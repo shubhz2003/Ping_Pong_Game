@@ -76,7 +76,7 @@ function drawText(text,x,y,color){
 function render(){
     //calling all the functions together
     //Make canvas
-    drawRect(0,0,400,600);
+    drawRect(0,0,400,600,"black");
 
     //Ai paddle
     drawRect(AI.x,AI.y,AI.width,AI.height, AI.color)
@@ -96,4 +96,106 @@ function render(){
 
 }
 
-render()
+//control the user paddle
+canvas.addEventListener("mousemove", movepaddle);
+function movepaddle(e){
+    let rect = canvas.getBoundingClientRect();
+    user.x = e.clientX - rect.left - user.width/2;
+}
+
+//collison detection
+function collison(b,p){ //b-ball, p-player
+    b.top = b.y - b.radius;
+    b.bottom = b.y + b.radius;
+    b.left = b.x - b.radius;
+    b.right = b.x + b.radius;
+
+    p.top = p.y;
+    p.bottom = p.y + p.height;
+    p.left = p.x;
+    p.right = p.x + p.width;
+
+    //conditions
+    return p.right > b.left && p.left < b.right && b.bottom > p.top && b.top < p.bottom;
+
+}
+
+//reset ball
+function resetBall(){
+    ball.x = canvas.width/2;
+    ball.y = canvas.height/2;
+
+    ball.speed = 1;
+    ball.velocityY = -ball.velocityY;
+}
+
+// Game over function
+function ShowGameOver(){
+    //Hide canvas
+    canvas.style.display = "none";
+    const can = document.getElementById("can");
+    can.style.display = "none";
+
+    //result container
+    const result = document.getElementById("result");
+    result.style.display = "block";
+}
+
+//update 
+function update(){
+    ball.x += ball.velocityX*ball.speed;
+    ball.y += ball.velocityY*ball.speed;
+
+    //contolling Ai paddle
+    let AiLevel = 0.1;
+    AI.x += (ball.x - (AI.x + AI.width/2)) + AiLevel;
+    if(ball.speed > 2){//if user manages hitting 5 back and forth 5 times Ai loses
+        AI.x += ball.x + 100;
+    }
+
+
+    //reflect from wall
+    if(ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0){
+        ball.velocityX = -ball.velocityX;
+    }
+
+    //if collision happens
+    let player = (ball.y < canvas.height/2) ? AI : user;
+    if(collison(ball,player)){
+        ball.velocityY = -ball.velocityY
+        ball.speed += 0.1;
+    }
+
+    //points 
+    if(ball.y - ball.radius < 0){
+        user.score++
+        resetBall()
+    }else if(ball.y + ball.radius > canvas.height){
+        AI.score++
+        resetBall()
+    }
+
+    //Game over
+    if(user.score > 19 || AI.score > 19){
+        clearInterval(loop);
+        ShowGameOver();
+    }
+}
+
+//start the game
+function start(){
+    update();
+    render();
+}
+
+//looping start function so ball keeps travelling down
+const loop = setInterval(start, 1000/50)
+
+// some sounds
+const hitSound = new Audio();
+const scoreSound = new Audio();
+const wallHitSound = new Audio();
+
+hitSound.src = 'https://raw.githubusercontent.com/the-coding-pie/Ping-Pong-Javascript/master/sounds/hitSound.wav';
+scoreSound.src = 'https://raw.githubusercontent.com/the-coding-pie/Ping-Pong-Javascript/master/sounds/scoreSound.wav';
+wallHitSound.src = 'https://raw.githubusercontent.com/the-coding-pie/Ping-Pong-Javascript/master/sounds/wallHitSound.wav';
