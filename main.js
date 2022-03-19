@@ -16,7 +16,7 @@ const AI = {
     y: 10,
     width: 50,
     height: 10,
-    color: "white",
+    color: "black",
     score: 0
 }
 
@@ -27,7 +27,7 @@ const user = {
     y: canvas.height - 10 - 10,
     width: 50,
     height: 10,
-    color: "white",
+    color: "red",
     score: 0
 }
 
@@ -76,7 +76,7 @@ function drawText(text,x,y,color){
 function render(){
     //calling all the functions together
     //Make canvas
-    drawRect(0,0,400,600,"black");
+    drawRect(0,0,400,600,"#3f00ba");
 
     //Ai paddle
     drawRect(AI.x,AI.y,AI.width,AI.height, AI.color)
@@ -170,15 +170,23 @@ function update(){
     if(ball.y - ball.radius < 0){
         user.score++
         resetBall()
+        alert("YOU GOT A POINT");
     }else if(ball.y + ball.radius > canvas.height){
         AI.score++
         resetBall()
+        alert("AI GOT A POINT");
     }
 
     //Game over
     if(user.score > 19 || AI.score > 19){
         clearInterval(loop);
         ShowGameOver();
+    }
+    if(user.score > 19){
+        alert("YOU WIN, CONGRATS!");
+    }
+    else if(AI.score > 19){
+        alert("AI WINS, BETTER LUCK NEXT TIME!");
     }
 }
 
@@ -191,11 +199,3 @@ function start(){
 //looping start function so ball keeps travelling down
 const loop = setInterval(start, 1000/50)
 
-// some sounds
-const hitSound = new Audio();
-const scoreSound = new Audio();
-const wallHitSound = new Audio();
-
-hitSound.src = 'https://raw.githubusercontent.com/the-coding-pie/Ping-Pong-Javascript/master/sounds/hitSound.wav';
-scoreSound.src = 'https://raw.githubusercontent.com/the-coding-pie/Ping-Pong-Javascript/master/sounds/scoreSound.wav';
-wallHitSound.src = 'https://raw.githubusercontent.com/the-coding-pie/Ping-Pong-Javascript/master/sounds/wallHitSound.wav';
